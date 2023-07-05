@@ -1,6 +1,9 @@
+/* /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import "./Login.css";
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -23,7 +26,7 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h2>Login</h2>
       <input
         type="text"
@@ -37,7 +40,10 @@ const Login = ({ onLogin }) => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={handleLogin}>Prisijungti</button>
+      <button onClick={handleLogin}>Login</button>
+      <p>
+        Do not have an account? <Link to="/register">Register</Link>
+      </p>
     </div>
   );
 };

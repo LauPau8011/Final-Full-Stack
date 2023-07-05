@@ -51,6 +51,7 @@ export default AnswerForm;
  */
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import "./AnswerForm.css";
 
 const AnswerForm = ({ questionId, onAnswerSubmit }) => {
   const [answerText, setAnswerText] = useState("");

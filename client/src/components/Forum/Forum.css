@@ -1,0 +1,26 @@
+.Forum ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.Forum li {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.Forum li h3 {
+  margin-top: 0;
+}
+.forum-container {
+  background-image: url("../../images/OIP.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  width: 100w;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

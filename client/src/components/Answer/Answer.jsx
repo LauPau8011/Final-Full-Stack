@@ -19,6 +19,7 @@ Answer.propTypes = {
 export default Answer; */
 import React from "react";
 import PropTypes from "prop-types";
+import "./Answer.css";
 
 const Answer = ({ answer, onLike, onDislike }) => {
   const handleLike = () => {

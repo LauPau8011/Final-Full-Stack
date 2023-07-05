@@ -5,6 +5,7 @@ import Forum from "./components/Forum/Forum";
 import QuestionDetails from "./components/QuestionDetails/QuestionDetails";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
+import "./App.css";
 
 const App = () => {
   return (

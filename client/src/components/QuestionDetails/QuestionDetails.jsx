@@ -1,74 +1,11 @@
 /* eslint-disable no-unused-vars */
-// QuestionDetails.jsx
-/* import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-import Answer from "../Answer/Answer";
-import AnswerForm from "../AnswerForm/AnswerForm";
 
-const QuestionDetails = () => {
-  const { id } = useParams();
-  const [question, setQuestion] = useState(null);
-  const [answers, setAnswers] = useState([]);
-
-  useEffect(() => {
-    fetchQuestion();
-    fetchAnswers();
-  }, []);
-
-  const fetchQuestion = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3000/questions/${id}`);
-      setQuestion(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchAnswers = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/questions/${id}/answers`
-      );
-      setAnswers(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleAnswerSubmit = (newAnswer) => {
-    setAnswers((prevAnswers) => [...prevAnswers, newAnswer]);
-  };
-
-  return (
-    <div>
-      {question && (
-        <div>
-          <h3>{question.text}</h3>
-          <p>Date: {question.date}</p>
-          <p>By: {question.userName}</p>
-        </div>
-      )}
-
-      <h4>Answers</h4>
-      <ul>
-        {answers.map((answer) => (
-          <Answer key={answer._id} answer={answer} />
-        ))}
-      </ul>
-
-      <AnswerForm questionId={id} onAnswerSubmit={handleAnswerSubmit} />
-    </div>
-  );
-};
-
-export default QuestionDetails;
- */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
 import AnswerForm from "../AnswerForm/AnswerForm";
 import Answer from "../Answer/Answer";
+import "./QuestionDetails.css";
 
 const QuestionDetails = ({ questionId }) => {
   const [question, setQuestion] = useState(null);
@@ -164,8 +101,9 @@ const QuestionDetails = ({ questionId }) => {
     </div>
   );
 };
+
 QuestionDetails.propTypes = {
-  questionId: PropTypes.any.isRequired,
+  questionId: PropTypes.string.isRequired,
 };
 
 export default QuestionDetails;
