@@ -1,10 +1,13 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./Forum.css";
+import FormItem from "../../components/FormItem/FormItem";
+import "./Home.css";
+import Navbar from "../../components/Navbar/Navbar";
 
-const Forum = () => {
+const Home = () => {
   const [questions, setQuestions] = useState([]);
+  const [answerText, setAnswerText] = useState("");
 
   useEffect(() => {
     fetchQuestions();
@@ -23,16 +26,18 @@ const Forum = () => {
     try {
       await axios.post(
         `http://localhost:3000/questions/${questionId}/answers`,
-        { answer }
+        { text: answer }
       );
-      fetchQuestions(); // Atnaujiname klausimų sąrašą po atsakymo pateikimo
+      fetchQuestions();
+      setAnswerText("");
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <div className="forum-container">
+    <div>
+      <Navbar />
       <h2>Forum</h2>
       <ul>
         {questions.map((question) => (
@@ -46,14 +51,7 @@ const Forum = () => {
                 const answer = event.target.elements.answer.value;
                 submitAnswer(question._id, answer);
               }}
-            >
-              <input
-                type="text"
-                name="answer"
-                placeholder="Enter your answer"
-              />
-              <button type="submit">Submit Answer</button>
-            </form>
+            ></form>
           </li>
         ))}
       </ul>
@@ -61,4 +59,4 @@ const Forum = () => {
   );
 };
 
-export default Forum;
+export default Home;

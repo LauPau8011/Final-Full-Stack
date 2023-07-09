@@ -1,5 +1,7 @@
+/* eslint-disable no-undef */
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
@@ -10,6 +12,13 @@ const dbName = process.env.DB_NAME;
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(
+  session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
 
 const client = new MongoClient(URI);
 
@@ -52,22 +61,24 @@ app.get('/questions/:id/answers', async (req, res) => {
   }
 });
 
-app.post('/questions/:id/answers', async ({ body, params }, res) => {
+app.post('/questions/:id/answers', async (req, res) => {
   try {
-    const { text, userName } = body;
-    const date = new Date();
-    const con = await client.connect();
-    const data = await con
-      .db(dbName)
-      .collection('answers')
-      .insertOne({
-        text,
-        date,
-        userName,
-        questionId: new ObjectId(params.id),
-      });
-    await con.close();
-    res.send(data);
+    if (req.sessionStore.isLoggedIn === true) {
+      const { text, userName } = req.body;
+      const date = new Date();
+      const con = await client.connect();
+      const data = await con
+        .db(dbName)
+        .collection('answers')
+        .insertOne({
+          text,
+          date,
+          userName,
+          questionId: new ObjectId(req.params.id),
+        });
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -75,16 +86,18 @@ app.post('/questions/:id/answers', async ({ body, params }, res) => {
 
 app.put('/answers/:id', async (req, res) => {
   try {
-    const con = await client.connect();
-    const { text } = req.body;
-    const date = new Date();
-    const newvalues = { $set: { text, date } };
-    const data = await con
-      .db(dbName)
-      .collection('answers')
-      .updateOne({ _id: new ObjectId(req.params.id) }, newvalues);
-    await con.close();
-    res.send(data);
+    if (req.session.isLoggedIn === true) {
+      const con = await client.connect();
+      const { text } = req.body;
+      const date = new Date();
+      const newvalues = { $set: { text, date } };
+      const data = await con
+        .db(dbName)
+        .collection('answers')
+        .updateOne({ _id: new ObjectId(req.params.id) }, newvalues);
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -92,13 +105,15 @@ app.put('/answers/:id', async (req, res) => {
 
 app.delete('/answers/:id', async (req, res) => {
   try {
-    const con = await client.connect();
-    const data = await con
-      .db(dbName)
-      .collection('answers')
-      .deleteOne({ _id: new ObjectId(req.params.id) });
-    await con.close();
-    res.send(data);
+    if (req.session.isLoggedIn === true) {
+      const con = await client.connect();
+      const data = await con
+        .db(dbName)
+        .collection('answers')
+        .deleteOne({ _id: new ObjectId(req.params.id) });
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -106,13 +121,18 @@ app.delete('/answers/:id', async (req, res) => {
 
 app.post('/answers/:id/like', async (req, res) => {
   try {
-    const con = await client.connect();
-    const data = await con
-      .db(dbName)
-      .collection('answers')
-      .updateOne({ _id: new ObjectId(req.params.id) }, { $inc: { likes: 1 } });
-    await con.close();
-    res.send(data);
+    if (req.session.isLoggedIn) {
+      const con = await client.connect();
+      const data = await con
+        .db(dbName)
+        .collection('answers')
+        .updateOne(
+          { _id: new ObjectId(req.params.id) },
+          { $inc: { likes: 1 } },
+        );
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -120,16 +140,18 @@ app.post('/answers/:id/like', async (req, res) => {
 
 app.post('/answers/:id/dislike', async (req, res) => {
   try {
-    const con = await client.connect();
-    const data = await con
-      .db(dbName)
-      .collection('answers')
-      .updateOne(
-        { _id: new ObjectId(req.params.id) },
-        { $inc: { dislikes: 1 } },
-      );
-    await con.close();
-    res.send(data);
+    if (req.session.isLoggedIn === true) {
+      const con = await client.connect();
+      const data = await con
+        .db(dbName)
+        .collection('answers')
+        .updateOne(
+          { _id: new ObjectId(req.params.id) },
+          { $inc: { dislikes: 1 } },
+        );
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -148,15 +170,17 @@ app.get('/questions', async (req, res) => {
 
 app.post('/questions', async ({ body }, res) => {
   try {
-    const { text, userName } = body;
-    const date = new Date();
-    const con = await client.connect();
-    const data = await con
-      .db(dbName)
-      .collection('questions')
-      .insertOne({ text, date, userName });
-    await con.close();
-    res.send(data);
+    if (req.session.isLoggedIn === true) {
+      const { text, userName } = body;
+      const date = new Date();
+      const con = await client.connect();
+      const data = await con
+        .db(dbName)
+        .collection('questions')
+        .insertOne({ text, date, userName });
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -190,8 +214,10 @@ app.post('/login', async (req, res) => {
     await con.close();
 
     if (data.length === 1) {
-      res.send(data[0].username);
+      req.session.isLoggedIn = true;
+      res.status(200).send(data[0].username);
     } else {
+      req.session.isLoggedIn = false;
       res.status(401).send('You need to register');
     }
   } catch (error) {
@@ -201,16 +227,17 @@ app.post('/login', async (req, res) => {
 
 app.put('/questions/:id', async (req, res) => {
   try {
-    const con = await client.connect();
-    const { text } = req.body;
-    const date = new Date();
-    const newvalues = { $set: { text, date } };
-    const data = await con
-      .db(dbName)
-      .collection('questions')
-      .updateOne({ _id: new ObjectId(req.params.id) }, newvalues);
-    await con.close();
-    res.send(data);
+    if (req.session.isLoggedIn === true) {
+      const con = await client.connect();
+      const { text } = req.body;
+      const newvalues = { $set: { text } };
+      const data = await con
+        .db(dbName)
+        .collection('questions')
+        .updateOne({ _id: new ObjectId(req.params.id) }, newvalues);
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -218,13 +245,15 @@ app.put('/questions/:id', async (req, res) => {
 
 app.delete('/questions/:id', async (req, res) => {
   try {
-    const con = await client.connect();
-    const data = await con
-      .db(dbName)
-      .collection('questions')
-      .deleteOne({ _id: new ObjectId(req.params.id) });
-    await con.close();
-    res.send(data);
+    if (req.session.isLoggedIn === true) {
+      const con = await client.connect();
+      const data = await con
+        .db(dbName)
+        .collection('questions')
+        .deleteOne({ _id: new ObjectId(req.params.id) });
+      await con.close();
+      res.send(data);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
