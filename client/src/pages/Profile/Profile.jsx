@@ -36,6 +36,13 @@ const Profile = () => {
         await axios.put(`http://localhost:3000/questions/${questionId}`, {
           text: newText,
         });
+        setQuestions((prevQuestions) =>
+          prevQuestions.map((question) =>
+            question._id === questionId
+              ? { ...question, text: newText }
+              : question
+          )
+        );
       }
     } catch (error) {
       console.error(error);
@@ -46,7 +53,10 @@ const Profile = () => {
     try {
       if (user && user.isLoggedIn) {
         await axios.delete(`http://localhost:3000/questions/${questionId}`);
-        fetchQuestions();
+
+        setQuestions((prevQuestions) =>
+          prevQuestions.filter((question) => question._id !== questionId)
+        );
       }
     } catch (error) {
       console.error(error);
@@ -60,28 +70,37 @@ const Profile = () => {
         <>
           <p>Username: {user.username}</p>
           <h3>Your Questions:</h3>
-          {userQuestions.map((question, index) => (
-            <div key={index}>
-              <p>{question.question}</p>
-              {user.isLoggedIn && (
-                <>
-                  <input
-                    type="text"
-                    value={question.text}
-                    onChange={(e) => editQuestion(question.id, e.target.value)}
-                  />
-                  <Button
-                    text="Save"
-                    onClick={() => editQuestion(question.id, question.text)}
-                  />
-                  <Button
-                    text="Delete"
-                    onClick={() => deleteQuestion(question.id)}
-                  />
-                </>
-              )}
-            </div>
-          ))}
+          {questions.map((question) => {
+            if (user.username === question.userName) {
+              return (
+                <div key={question._id}>
+                  <p>{question.text}</p>
+                  {user.isLoggedIn && (
+                    <>
+                      <input
+                        type="text"
+                        value={question.text}
+                        onChange={(e) =>
+                          editQuestion(question._id, e.target.value)
+                        }
+                      />
+                      <Button
+                        text="Save"
+                        onClick={() =>
+                          editQuestion(question._id, question.text)
+                        }
+                      />
+                      <Button
+                        text="Delete"
+                        onClick={() => deleteQuestion(question._id)}
+                      />
+                    </>
+                  )}
+                </div>
+              );
+            }
+            return null;
+          })}
         </>
       )}
       <Button text="Logout" onClick={handleLogout} />

@@ -11,14 +11,25 @@ const AskQuestion = () => {
   const { user } = useContext(UserContext);
   const [questionText, setQuestionText] = useState("");
   const [questionId, setQuestionId] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleAskQuestion = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/questions", {
-        content: questionText,
+      const response = await axios.post(`http://localhost:3000/questions`, {
+        text: questionText,
         userName: user.username,
       });
       if (response.status === 200) {
+        setQuestionId(response.data);
+        const storedQuestions =
+          JSON.parse(localStorage.getItem("questions")) || [];
+        storedQuestions.push({
+          id: response.data,
+          text: questionText,
+          userName: user.username,
+        });
+        localStorage.setItem("questions", JSON.stringify(storedQuestions));
         navigate("/");
       }
     } catch (error) {
@@ -28,6 +39,7 @@ const AskQuestion = () => {
 
   const handleEditQuestion = async () => {
     try {
+      setIsEditing(true);
       const response = await axios.put(
         `http://localhost:3000/questions/${questionId}`,
         {
@@ -36,22 +48,27 @@ const AskQuestion = () => {
       );
       if (response.status === 200) {
         console.log("Question updated");
+        setIsEditing(false);
       }
     } catch (error) {
       console.error(error);
+      setIsEditing(false);
     }
   };
 
   const handleDeleteQuestion = async () => {
     try {
+      setIsDeleting(true);
       const response = await axios.delete(
         `http://localhost:3000/questions/${questionId}`
       );
       if (response.status === 200) {
         console.log("Question deleted");
+        setIsDeleting(false);
       }
     } catch (error) {
       console.error(error);
+      setIsDeleting(false);
     }
   };
 
@@ -66,8 +83,12 @@ const AskQuestion = () => {
       {user ? (
         <>
           <Button text="Submit" onClick={handleAskQuestion} />
-          <Button text="Edit" onClick={handleEditQuestion} />
-          <Button text="Delete" onClick={handleDeleteQuestion} />
+          {questionId && !isEditing && !isDeleting && (
+            <>
+              <Button text="Edit" onClick={handleEditQuestion} />
+              <Button text="Delete" onClick={handleDeleteQuestion} />
+            </>
+          )}
         </>
       ) : (
         <p>Please login to ask a question.</p>

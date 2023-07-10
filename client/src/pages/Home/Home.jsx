@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import FormItem from "../../components/FormItem/FormItem";
 import "./Home.css";
 import Navbar from "../../components/Navbar/Navbar";
 
@@ -45,13 +45,6 @@ const Home = () => {
             <h3>{question.text}</h3>
             <p>Date: {question.date}</p>
             <p>By: {question.userName}</p>
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                const answer = event.target.elements.answer.value;
-                submitAnswer(question._id, answer);
-              }}
-            ></form>
           </li>
         ))}
       </ul>

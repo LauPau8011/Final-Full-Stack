@@ -63,7 +63,7 @@ app.get('/questions/:id/answers', async (req, res) => {
 
 app.post('/questions/:id/answers', async (req, res) => {
   try {
-    if (req.sessionStore.isLoggedIn === true) {
+    if (req.session.isLoggedIn) {
       const { text, userName } = req.body;
       const date = new Date();
       const con = await client.connect();
@@ -86,7 +86,7 @@ app.post('/questions/:id/answers', async (req, res) => {
 
 app.put('/answers/:id', async (req, res) => {
   try {
-    if (req.session.isLoggedIn === true) {
+    if (req.session.isLoggedIn) {
       const con = await client.connect();
       const { text } = req.body;
       const date = new Date();
@@ -140,7 +140,7 @@ app.post('/answers/:id/like', async (req, res) => {
 
 app.post('/answers/:id/dislike', async (req, res) => {
   try {
-    if (req.session.isLoggedIn === true) {
+    if (req.session.isLoggedIn) {
       const con = await client.connect();
       const data = await con
         .db(dbName)
@@ -168,10 +168,10 @@ app.get('/questions', async (req, res) => {
   }
 });
 
-app.post('/questions', async ({ body }, res) => {
+app.post('/questions', async (req, res) => {
   try {
-    if (req.session.isLoggedIn === true) {
-      const { text, userName } = body;
+    if (req.session.isLoggedIn) {
+      const { text, userName } = req.body;
       const date = new Date();
       const con = await client.connect();
       const data = await con
@@ -179,7 +179,9 @@ app.post('/questions', async ({ body }, res) => {
         .collection('questions')
         .insertOne({ text, date, userName });
       await con.close();
-      res.send(data);
+      res.send(data.insertedId);
+    } else {
+      res.status(401).send('You need to login');
     }
   } catch (error) {
     res.status(500).send(error);
@@ -237,6 +239,8 @@ app.put('/questions/:id', async (req, res) => {
         .updateOne({ _id: new ObjectId(req.params.id) }, newvalues);
       await con.close();
       res.send(data);
+    } else {
+      res.status(500).send(error);
     }
   } catch (error) {
     res.status(500).send(error);
@@ -253,6 +257,8 @@ app.delete('/questions/:id', async (req, res) => {
         .deleteOne({ _id: new ObjectId(req.params.id) });
       await con.close();
       res.send(data);
+    } else {
+      res.status(401).send('You need to login');
     }
   } catch (error) {
     res.status(500).send(error);

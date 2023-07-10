@@ -1,4 +1,3 @@
-/* import "./Layout.css"; */
 import PropTypes from "prop-types";
 
 const LoginLayout = ({ children }) => {
